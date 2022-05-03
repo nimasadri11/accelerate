@@ -42,7 +42,9 @@ def should_reduce_batch_size(exception: Exception) -> bool:
     return False
 
 
-def find_executable_batch_size(function: callable = None, starting_batch_size: int = 128):
+def find_executable_batch_size(
+    function: callable = None, starting_batch_size: int = 128, auto_find_batch_size: bool = True
+):
     """
     A basic decorator that will try to execute `function`. If it fails from exceptions related to out-of-memory or
     CUDNN, the batch size is cut in half and passed to `function`
@@ -54,11 +56,16 @@ def find_executable_batch_size(function: callable = None, starting_batch_size: i
             A function to wrap
         starting_batch_size (`int`, *optional*):
             The batch size to try and fit into memory
+        auto_find_batch_size (`bool`, *optional*):
+            Whether to try and find the executable batch size. Default is True.
     """
     if function is None:
         return functools.partial(find_executable_batch_size, starting_batch_size=starting_batch_size)
 
     batch_size = starting_batch_size
+
+    if not auto_find_batch_size:
+        return function
 
     def decorator(*args, **kwargs):
         nonlocal batch_size

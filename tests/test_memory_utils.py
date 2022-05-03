@@ -89,3 +89,12 @@ class MemoryTest(unittest.TestCase):
         with self.assertRaises(ValueError) as cm:
             mock_training_loop_function()
             self.assertIn("Oops, we had an error!", cm.exception.args[0])
+
+    def test_without_finding_batch_size(self):
+        @find_executable_batch_size(auto_find_batch_size=False)
+        def mock_training_loop_function(batch_size):
+            raise raise_fake_out_of_memory()
+
+        with self.assertRaises(RuntimeError) as cm:
+            mock_training_loop_function()
+            self.assertIn("CUDA out of memory.", cm.exception.args[0])
