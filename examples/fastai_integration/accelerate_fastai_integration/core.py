@@ -5,24 +5,15 @@ __all__ = []
 # Cell
 import torch
 from fastcore.basics import patch
-from fastai.metrics import AccumMetric, ActivationType
+from fastai.metrics import AvgSmoothLoss
 from fastai.optimizer import Optimizer, OptimWrapper, _convert_params, pytorch_hp_map, _update
-from fastai.torch_core import to_device, default_device
+from fastai.torch_core import to_device, default_device, to_detach
 
 # Cell
 @patch
-def accumulate(self:AccumMetric, learn):
-    "Store targs and preds from `learn`, using activation function and argmax as appropriate"
-    pred = learn.pred
-    if hasattr(learn, "accelerator"):
-        pred, learn.y = learn.gather((pred, learn.y))
-    if self.activation in [ActivationType.Softmax, ActivationType.BinarySoftmax]:
-        pred = F.softmax(pred, dim=self.dim_argmax)
-        if self.activation == ActivationType.BinarySoftmax: pred = pred[:, -1]
-    elif self.activation == ActivationType.Sigmoid: pred = torch.sigmoid(pred)
-    elif self.dim_argmax: pred = pred.argmax(dim=self.dim_argmax)
-    if self.thresh:  pred = (pred >= self.thresh)
-    self.accum_values(pred,learn.y,learn)
+def accumulate(self:AvgSmoothLoss, learn):
+    self.count += 1
+    self.val = torch.lerp(to_detach(learn.loss.mean(), gather=True), self.val, self.beta)
 
 # Cell
 @patch
