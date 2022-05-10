@@ -3,7 +3,7 @@
 from fastai.vision.all import *
 from accelerate import Accelerator
 import accelerate.utils as utils # So we can have our own set_seed that works in a multiprocess setup
-from .implementation import *
+from accelerate_fastai_integration import *
 
 def get_data():
     path = untar_data(URLs.PETS)/"images"

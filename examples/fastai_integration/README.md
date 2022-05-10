@@ -10,6 +10,12 @@ pip install accelerate
 pip install git+https://github.com/huggingface/accelerate
 ```
 
+Then clone this repository, and install the integration with:
+```bash
+cd accelerate/examples/fastai_integration
+pip install -e .
+```
+
 ## Run Example Script
 To run the example script, first run `accelerate config` in bash.
 
