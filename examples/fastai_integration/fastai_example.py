@@ -24,7 +24,9 @@ def train_fn():
     # We simply build our AcceleratorCallback
     cbs = [AcceleratorCallback(accelerator)]
     learn = vision_learner(dls, resnet34, metrics=error_rate, cbs=cbs)
-    # And then train
+    # For now we manually remove the other loggers
+    if not accelerator.is_main_process:
+        learn.logger = noop
     learn.fit_one_cycle(3)
     
 @call_parse
