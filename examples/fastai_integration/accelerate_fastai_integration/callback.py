@@ -3,12 +3,23 @@
 __all__ = ['AcceleratorCallback']
 
 # Cell
-from fastcore.basics import store_attr
+from fastcore.basics import store_attr, patch
 from fastai.callback.core import Callback, CancelBackwardException
 from fastai.distributed import DistributedDL
 from fastai.optimizer import OptimWrapper
+from fastai.torch_core import to_device, default_device
 
 from accelerate import Accelerator
+
+# Cell
+@patch
+def _set_device(self:Learner, b):
+    if hasattr(self, "accelerator"): return to_device(b, self.accelerator.device)
+    else:
+        model_device = torch.device(torch.cuda.current_device()) if next(self.model.parameters()).is_cuda else torch.device("cpu")
+        dls_device = getattr(self.dls, 'device', default_device())
+        if model_device == dls_device: return to_device(b, dls_device)
+        else: return to_device(b, model_device)
 
 # Cell
 class AcceleratorCallback(Callback):

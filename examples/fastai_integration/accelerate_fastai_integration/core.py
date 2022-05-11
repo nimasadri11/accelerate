@@ -35,38 +35,3 @@ def __init__(self:OptimWrapper, params, opt, hp_map=None, convert_groups=True, *
     self.bwd_map = {v:k for k,v in self.fwd_map.items()}
     self.state = defaultdict(dict, {})
     self.frozen_idx = 0
-
-# Cell
-@patch
-def gather(self:Learner, *items):
-    "Gathers a tensor or list of tensors across all devices"
-    return self.acelerator.gather(items)
-
-# Cell
-@patch
-def _set_device(self:Learner, b):
-    if hasattr(self, "accelerator"):
-        return to_device(b, self.accelerator.device)
-    else:
-        model_device = torch.device(torch.cuda.current_device()) if next(self.model.parameters()).is_cuda else torch.device('cpu')
-        dls_device = getattr(self.dls, 'device', default_device())
-        if model_device == dls_device: return to_device(b, dls_device)
-        else: return to_device(b, model_device)
-
-# Cell
-@patch
-def _do_one_batch(self:Learner):
-    self.pred = self.model(*self.xb)
-    self('after_pred')
-    if len(self.yb):
-        self.loss_grad = self.loss_func(self.pred, *self.yb)
-        self.loss = self.loss_grad.clone()
-    self('after_loss')
-    if not self.training or not len(self.yb): return
-    self('before_backward')
-    if hasattr(self, 'accelerator'):
-        self.accelerator.backward(self.loss_grad)
-    else:
-        self.loss_grad.backward()
-    self._with_events(self.opt.step, 'step', CancelStepException)
-    self.opt.zero_grad()
