@@ -6,7 +6,7 @@ __all__ = []
 import torch
 from fastcore.basics import patch
 from fastai.learner import AvgSmoothLoss, Learner
-from fastai.optimizer import Optimizer, OptimWrapper, _convert_params, pytorch_hp_map, _update
+from fastai.optimizer import Optimizer, OptimWrapper, _convert_params, pytorch_hp_map, _update, detuplify_pg
 from fastai.torch_core import to_device, default_device, to_detach
 
 # Cell
