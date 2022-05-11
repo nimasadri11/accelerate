@@ -4,6 +4,7 @@ __all__ = []
 
 # Cell
 import torch
+from collections import defaultdict
 from fastcore.basics import patch
 from fastai.learner import AvgSmoothLoss, Learner
 from fastai.optimizer import Optimizer, OptimWrapper, _convert_params, pytorch_hp_map, _update, detuplify_pg
