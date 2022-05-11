@@ -4,7 +4,7 @@ __all__ = ['AcceleratorCallback']
 
 # Cell
 from fastcore.basics import store_attr
-from fastai.callback.core import Callback
+from fastai.callback.core import Callback, CancelBackwardException
 from fastai.distributed import DistributedDL
 from fastai.optimizer import OptimWrapper
 
@@ -19,7 +19,7 @@ class AcceleratorCallback(Callback):
     def before_fit(self):
         "Tie `self.accelerator` to the learner and prepare the model and optimizer"
         self.learn.accelerator = self.accelerator
-        self.model = self.accelerator.prepare(self.learn.model)
+        self.learn.model = self.accelerator.prepare(self.learn.model)
         opt = self.accelerator.prepare_optimizer(self.learn.opt)
         # Does this maintain the layer groups?
         self.learn.opt = OptimWrapper(self.learn.model.parameters(), opt)
