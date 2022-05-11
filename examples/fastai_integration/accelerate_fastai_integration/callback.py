@@ -39,5 +39,10 @@ class AcceleratorCallback(Callback):
             self.learn.dl = self._prepare_dataloader(self.learn.dl, self.accelerator)
 
     def before_validate(self):
-        if accelerator.num_processes > 1:
+        if self.accelerator.num_processes > 1:
             self.learn.dl = self._prepare_dataloader(self.learn.dl, self.accelerator)
+
+    def before_backward(self):
+        "Call accelerator.backward"
+        self.accelerator.backward(self.learn.loss_grad)
+        raise CancelBackwardException()
